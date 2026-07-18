@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رصين | المنصة المتكاملة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #f8fafc; }
+        .document-paper { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 210mm; min-height: 297mm; background: white; padding: 25mm; }
+    </style>
+</head>
+<body class="h-screen flex">
+    <main class="flex-1 flex">
+        <section class="w-1/3 bg-white p-8 border-l border-slate-200">
+            <h2 class="text-xl font-bold mb-6">إدخال البيانات</h2>
+            <div id="dynamic-inputs" class="space-y-4">
+                <div><label class="block text-xs font-bold text-slate-400 mb-1">اسم العميل</label><input type="text" id="in-name" oninput="updatePreview()" class="w-full border-b py-2 outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-400 mb-1">اسم المشروع</label><input type="text" id="in-project" oninput="updatePreview()" class="w-full border-b py-2 outline-none"></div>
+                <div><label class="block text-xs font-bold text-slate-400 mb-1">قيمة العقد</label><input type="text" id="in-amount" oninput="updatePreview()" class="w-full border-b py-2 outline-none"></div>
+            </div>
+            <button onclick="saveData()" class="w-full mt-8 bg-black text-white font-bold py-3 rounded-lg">حفظ وطباعة</button>
+        </section>
+        <section class="flex-1 p-10 bg-slate-100 flex justify-center">
+            <div id="preview" class="document-paper"></div>
+        </section>
+    </main>
+
+    <script>
+        // ضع المفاتيح هنا
+        const SUPABASE_URL = 'https://berurvnlxvemnfmvmcni.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlcnVydm5seHZlbW5mbXZtY25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzODQ4NzMsImV4cCI6MjA5OTk2MDg3M30.o2VR0Qo3kkZ2aGthMm1UiJwV9mbBmDg6yH9NIgmfIpQ';
+        
+        // قمنا بتغيير الاسم هنا لـ client لتجنب الخطأ
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function updatePreview() {
+            const name = document.getElementById('in-name').value;
+            const project = document.getElementById('in-project').value;
+            const amount = document.getElementById('in-amount').value;
+            document.getElementById('preview').innerHTML = `<h1>عقد مقاولات</h1><p>العميل: ${name}</p><p>المشروع: ${project}</p><p>القيمة: ${amount}</p>`;
+        }
+
+        async function saveData() {
+            const data = {
+                name: document.getElementById('in-name').value,
+                project: document.getElementById('in-project').value,
+                amount: document.getElementById('in-amount').value
+            };
+            // استخدمنا client بدلاً من supabase هنا
+            const { error } = await client.from('documents').insert([{ type: 'contract', content: data }]);
+            if (error) { alert('خطأ: ' + error.message); } 
+            else { alert('تم الحفظ بنجاح!'); window.print(); }
+        }
+    </script>
+</body>
+</html>
