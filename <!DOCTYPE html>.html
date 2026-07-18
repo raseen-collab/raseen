@@ -28,11 +28,12 @@
     </main>
 
     <script>
-        // ضع المفاتيح هنا فقط
-        const SUPABASE_URL = 'https://berurvnlxvemnfmvmcni.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlcnVydm5seHZlbW5mbXZtY25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzODQ4NzMsImV4cCI6MjA5OTk2MDg3M30.o2VR0Qo3kkZ2aGthMm1UiJwV9mbBmDg6yH9NIgmfIpQ';
+        // ضع المفاتيح هنا
+        const URL_KEY = 'https://berurvnlxvemnfmvmcni.supabase.co';
+        const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlcnVydm5seHZlbW5mbXZtY25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzODQ4NzMsImV4cCI6MjA5OTk2MDg3M30.o2VR0Qo3kkZ2aGthMm1UiJwV9mbBmDg6yH9NIgmfIpQ';
         
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // استخدام اسم متغير فريد جداً لتجنب أي تعارض
+        const myDbConnection = window.supabase.createClient(URL_KEY, ANON_KEY);
 
         function updatePreview() {
             const name = document.getElementById('in-name').value;
@@ -47,7 +48,10 @@
                 project: document.getElementById('in-project').value,
                 amount: document.getElementById('in-amount').value
             };
-            const { error } = await supabase.from('documents').insert([{ type: 'contract', content: data }]);
+            
+            // استخدام المتغير الجديد
+            const { error } = await myDbConnection.from('documents').insert([{ type: 'contract', content: data }]);
+            
             if (error) { alert('خطأ: ' + error.message); } 
             else { alert('تم الحفظ بنجاح!'); window.print(); }
         }
