@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رصين | المنصة الرقمية المتكاملة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .document-paper { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 210mm; min-height: 297mm; background: white; padding: 25mm; }
+        .nav-item { cursor: pointer; padding: 12px 20px; border-radius: 8px; color: #64748b; font-weight: 600; transition: all 0.2s; border-right: 4px solid transparent; }
+        .nav-item:hover { background: #f1f5f9; color: #0f172a; }
+        .nav-active { background: #eff6ff !important; color: #1e3a8a !important; border-right: 4px solid #1e3a8a !important; }
+        @media print { 
+            .no-print { display: none !important; } 
+            body { background: white; }
+            .document-paper { box-shadow: none; margin: 0; padding: 0; }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="no-print w-72 bg-white border-l border-slate-200 p-6 flex flex-col">
+        <div class="mb-10 text-2xl font-black text-slate-900 tracking-tight">رَصين</div>
+        <nav id="nav" class="space-y-2 flex-1"></nav>
+        <div class="bg-slate-50 p-4 rounded-lg text-center text-xs text-slate-400">نظام رصين للمقاولات V1.0</div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+        <!-- Inputs Panel -->
+        <section class="no-print w-1/3 bg-white p-8 border-l border-slate-200 overflow-y-auto">
+            <h2 id="service-title" class="text-xl font-bold mb-6 text-slate-900">...</h2>
+            <div id="dynamic-inputs" class="space-y-4"></div>
+            <button onclick="window.print()" class="w-full mt-8 bg-slate-900 text-white font-bold py-3 rounded-lg hover:bg-black transition shadow-lg">طباعة المستند (PDF)</button>
+        </section>
+
+        <!-- Preview Panel -->
+        <section class="flex-1 p-10 overflow-y-auto bg-slate-100 flex justify-center">
+            <div id="preview" class="document-paper text-sm leading-relaxed text-slate-800"></div>
+        </section>
+    </main>
+
+    <script>
+        const services = {
+            contract: {
+                title: "عقد المقاولات",
+                inputs: [{id: 'name', label: 'اسم العميل'}, {id: 'project', label: 'اسم المشروع'}, {id: 'amount', label: 'قيمة العقد'}],
+                template: (d) => `
+                    <div class="text-center mb-12"><h1 class="text-2xl font-bold underline">اتفاقية عقد مقاولات</h1></div>
+                    <p class="mb-6">إنه في تاريخ اليوم، تم الاتفاق بين مؤسسة رصين (الطرف الأول) والطرف الثاني/المالك: <strong>${d.name || '.......'}</strong>.</p>
+                    <p class="mb-6">يتعهد المقاول بتنفيذ أعمال <strong>${d.project || '.......'}</strong> بمبلغ إجمالي قدره <strong>${d.amount || '.......'}</strong> ريال سعودي وفقاً للمواصفات الفنية المعتمدة وشروط الكود السعودي للبناء.</p>
+                `
+            },
+            employee: {
+                title: "عقد عمل (عمالة)",
+                inputs: [{id: 'worker', label: 'اسم العامل'}, {id: 'job', label: 'المهنة'}, {id: 'salary', label: 'الراتب الشهري'}],
+                template: (d) => `
+                    <div class="text-center mb-12"><h1 class="text-2xl font-bold underline">عقد عمل</h1></div>
+                    <p class="mb-6">تم الاتفاق مع العامل: <strong>${d.worker || '.......'}</strong> للعمل بمهنة <strong>${d.job || '.......'}</strong>.</p>
+                    <p class="mb-6">يتقاضى العامل راتباً شهرياً قدره <strong>${d.salary || '.......'}</strong> ريال سعودي، مع الالتزام بكافة عهد العمل والسرية المهنية.</p>
+                `
+            },
+            invoice: {
+                title: "فاتورة ضريبية",
+                inputs: [{id: 'client', label: 'اسم العميل'}, {id: 'desc', label: 'وصف الخدمة'}, {id: 'val', label: 'المبلغ (بدون ضريبة)'}],
+                template: (d) => `
+                    <div class="text-center mb-12"><h1 class="text-2xl font-bold underline">فاتورة ضريبية</h1></div>
+                    <p class="mb-6">العميل: <strong>${d.client || '.......'}</strong></p>
+                    <p class="mb-6">الخدمة: <strong>${d.desc || '.......'}</strong></p>
+                    <div class="border-t pt-4 mt-8">
+                        <p>المبلغ الأساسي: ${d.val || 0} ريال</p>
+                        <p>ضريبة القيمة المضافة (15%): ${(parseFloat(d.val || 0) * 0.15).toFixed(2)} ريال</p>
+                        <p class="text-xl font-bold mt-4">الإجمالي: ${(parseFloat(d.val || 0) * 1.15).toFixed(2)} ريال</p>
+                    </div>
+                `
+            }
+        };
+
+        function renderNav() {
+            const nav = document.getElementById('nav');
+            Object.keys(services).forEach(key => {
+                const div = document.createElement('div');
+                div.className = 'nav-item';
+                div.id = 'btn-' + key;
+                div.innerText = services[key].title;
+                div.onclick = () => selectService(key);
+                nav.appendChild(div);
+            });
+        }
+
+        function selectService(key) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-active'));
+            document.getElementById('btn-' + key).classList.add('nav-active');
+            document.getElementById('service-title').innerText = services[key].title;
+            
+            const container = document.getElementById('dynamic-inputs');
+            container.innerHTML = '';
+            services[key].inputs.forEach(field => {
+                container.innerHTML += `<div><label class="block text-xs font-bold text-slate-400 mb-1">${field.label}</label><input type="text" id="in-${field.id}" oninput="updatePreview('${key}')" class="w-full border-b py-2 outline-none focus:border-black text-sm"></div>`;
+            });
+            updatePreview(key);
+        }
+
+        function updatePreview(key) {
+            const data = {};
+            services[key].inputs.forEach(f => data[f.id] = document.getElementById('in-' + f.id).value);
+            document.getElementById('preview').innerHTML = services[key].template(data);
+        }
+
+        renderNav();
+        selectService('contract');
+    </script>
+</body>
+</html>
